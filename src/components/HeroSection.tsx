@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Sun, Cloud } from "lucide-react";
+import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-farm.jpg";
 
 interface HeroSectionProps {
@@ -9,11 +10,11 @@ interface HeroSectionProps {
 const translations = {
   en: {
     badge: "Trusted by 10,000+ farmers across Malawi",
-    title: "Grow Smarter.",
-    titleHighlight: "Harvest Better.",
-    subtitle: "Digital agricultural advisory and consultancy services designed for Malawian farmers. Get expert guidance, weather alerts, and personalized crop recommendations.",
-    cta: "Start Your Journey",
-    secondary: "Watch How It Works",
+    title: "Get Weather Alerts.",
+    titleHighlight: "Grow More Food.",
+    subtitle: "Free weather forecasts, farming tips, and expert advice via SMS and WhatsApp. Join thousands of Malawian farmers increasing their yields.",
+    cta: "Register Free",
+    secondary: "See How It Works",
     stat1: "Active Farmers",
     stat2: "Districts Covered",
     stat3: "Expert Consultants",
@@ -24,10 +25,10 @@ const translations = {
   },
   ny: {
     badge: "Alimi opitilira 10,000 ku Malawi amatithemba",
-    title: "Limani Mwanzeru.",
-    titleHighlight: "Kololani Bwino.",
-    subtitle: "Ntchito za uphungu wa ulimi zopangidwa kwa alimi a ku Malawi. Pezani malangizo a akatswiri, machenjezo a nyengo, ndi malangizo a mbeu.",
-    cta: "Yambani Ulendo Wanu",
+    title: "Landirani Machenjezo a Nyengo.",
+    titleHighlight: "Limani Zambiri.",
+    subtitle: "Zolosera za nyengo zaulere, malangizo a ulimi, ndi uphungu wa akatswiri pa SMS ndi WhatsApp. Lowani ndi alimi masauzande a ku Malawi omwe akuwonjezera zokolola zawo.",
+    cta: "Lembetsani Kwaulere",
     secondary: "Onani Momwe Zimagwirira Ntchito",
     stat1: "Alimi Ogwira Ntchito",
     stat2: "Maboma Omwe Timagwira",
@@ -50,6 +51,8 @@ export function HeroSection({ language }: HeroSectionProps) {
           src={heroImage}
           alt="Malawian farmland with lush green crops"
           className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-primary/40" />
         <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
@@ -80,13 +83,17 @@ export function HeroSection({ language }: HeroSectionProps) {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="hero-accent" className="group">
-                {t.cta}
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <Button variant="hero-accent" className="group" asChild>
+                <Link to="/register">
+                  {t.cta}
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </Button>
-              <Button variant="hero-outline" className="group">
-                <Play className="w-5 h-5" />
-                {t.secondary}
+              <Button variant="hero-outline" className="group" asChild>
+                <Link to="/about">
+                  <Play className="w-5 h-5" />
+                  {t.secondary}
+                </Link>
               </Button>
             </div>
 

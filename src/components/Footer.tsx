@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
-import { Sprout, Facebook, Twitter, Instagram, Youtube, MapPin, Phone, Mail } from "lucide-react";
+import logoImage from "@/assets/logo.jpeg";
+import footerBg from "@/assets/footer-farm.jpg"
+import { Sprout, Facebook, Twitter, Instagram, Youtube, MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 
 interface FooterProps {
   language: "en" | "ny";
@@ -59,17 +61,23 @@ export function Footer({ language }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-primary text-primary-foreground">
+    <footer className="relative bg-primary text-primary-foreground overflow-hidden">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img src={footerBg} alt="" className="w-full h-full object-cover opacity-50" />
+        <div className="absolute inset-0 bg-primary/80" />
+      </div>
+
       {/* Main Footer */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Column */}
           <div className="space-y-6">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary-foreground/10 flex items-center justify-center">
-                <Sprout className="w-6 h-6 text-accent" />
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center overflow-hidden">
+                <img src={logoImage} alt="Logo" className="w-full h-full object-contain" />
               </div>
-            <div>
+              <div>
                 <span className="font-bold text-lg">Mlimi Anyamuke</span>
                 <span className="text-primary-foreground/70 text-sm block -mt-1">Initiative</span>
               </div>
@@ -77,18 +85,6 @@ export function Footer({ language }: FooterProps) {
             <p className="text-primary-foreground/70 leading-relaxed">
               {t.description}
             </p>
-            {/* Social Links */}
-            <div className="flex gap-3">
-              {[Facebook, Twitter, Instagram, Youtube].map((Icon, index) => (
-                <a
-                  key={index}
-                  href="#"
-                  className="w-10 h-10 rounded-lg bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors"
-                >
-                  <Icon className="w-5 h-5" />
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Quick Links */}
@@ -129,17 +125,25 @@ export function Footer({ language }: FooterProps) {
           <div>
             <h4 className="font-semibold text-lg mb-6">{t.contact}</h4>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                <span className="text-primary-foreground/70">City Centre, Lilongwe, Malawi</span>
+              <li className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-accent flex-shrink-0" />
+                <a href="mailto:mzungap@gmail.com" className="text-primary-foreground/70 hover:text-white transition-colors">mzungap@gmail.com</a>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-accent flex-shrink-0" />
-                <span className="text-primary-foreground/70">+265 999 123 456</span>
+                <a href="tel:+265894199625" className="text-primary-foreground/70 hover:text-white transition-colors">+265 894 199 625</a>
               </li>
               <li className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-accent flex-shrink-0" />
-                <span className="text-primary-foreground/70">info@mlimianyamuke.mw</span>
+                <MessageCircle className="w-5 h-5 text-accent flex-shrink-0" />
+                <a href="https://wa.me/265996058928" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/70 hover:text-white transition-colors">+265 996 058 928</a>
+              </li>
+              <li className="flex items-center gap-3">
+                <Facebook className="w-5 h-5 text-accent flex-shrink-0" />
+                <a href="https://web.facebook.com/profile.php?id=100095065316526" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/70 hover:text-white transition-colors">Mlimi Anyamuke Initiative</a>
+              </li>
+              <li className="flex items-start gap-3">
+                <MapPin className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+                <span className="text-primary-foreground/70">Dowa, Malawi</span>
               </li>
             </ul>
           </div>
@@ -150,10 +154,10 @@ export function Footer({ language }: FooterProps) {
       <div className="border-t border-primary-foreground/10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-primary-foreground/60 text-sm">
+            <p className="text-white text-sm font-medium">
               © {currentYear} Mlimi Anyamuke Initiative. {t.rights}
             </p>
-            <p className="text-primary-foreground/40 text-sm italic">
+            <p className="text-white text-sm italic font-medium">
               {t.tagline}
             </p>
           </div>

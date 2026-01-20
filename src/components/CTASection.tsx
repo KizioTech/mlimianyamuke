@@ -39,7 +39,7 @@ export function CTASection({ language }: CTASectionProps) {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button variant="hero-accent" size="xl" className="group" asChild>
-            <Link to="/farmers">
+            <Link to="/register">
               {t.cta}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>

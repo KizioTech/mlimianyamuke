@@ -10,6 +10,7 @@ const translations = {
     badge: "Success Stories",
     title: "What Farmers",
     titleHighlight: "Are Saying",
+    realTestimonials: false, // NEW FLAG
     testimonials: [
       {
         quote: "Mlimi Anyamuke Initiative helped me double my maize yield this season. The weather alerts saved my crops from unexpected rains.",
@@ -35,6 +36,7 @@ const translations = {
     badge: "Nkhani Zopambana",
     title: "Zimene Alimi",
     titleHighlight: "Akunena",
+    realTestimonials: false, // NEW FLAG
     testimonials: [
       {
         quote: "Mlimi Anyamuke Initiative andithandiza kuwonjezererapo chimanga changa kawiri nyengo ino. Machenjezo a nyengo anapulumutsa mbeu zanga ku mvula yodzidzimutsa.",
@@ -101,6 +103,13 @@ export function TestimonialsSection({ language }: TestimonialsSectionProps) {
             </Card>
           ))}
         </div>
+        {!t.realTestimonials && (
+          <div className="text-center text-sm text-muted-foreground mt-8 italic">
+            {language === "en"
+              ? "Sample testimonials. Real farmer stories coming soon."
+              : "Zitsanzo za umboni. Nkhani zenizeni za alimi zikubwera posachedwa."}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -12,7 +12,7 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       <Navbar language={language} onLanguageChange={setLanguage} />
-      <main>{children}</main>
+      <main className="pt-20">{children}</main>
       <Footer language={language} />
     </div>
   );

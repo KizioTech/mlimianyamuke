@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check, ArrowRight, Smartphone, Wifi, Headphones } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface FarmersSectionProps {
   language: "en" | "ny";
@@ -21,7 +22,7 @@ const translations = {
       "SMS alerts when you need them",
     ],
     cta: "Register as a Farmer",
-    secondary: "Learn More",
+    secondary: "Check Weather",
     card1Title: "Mobile-First Design",
     card1Desc: "Optimized for the phones Malawian farmers actually use",
     card2Title: "Low Bandwidth",
@@ -43,7 +44,7 @@ const translations = {
       "Machenjezo a SMS mukafunika",
     ],
     cta: "Lembetsani ngati Mlimi",
-    secondary: "Phunzirani Zambiri",
+    secondary: "Yang'anani Nyengo",
     card1Title: "Yapangidwa pa Foni",
     card1Desc: "Yapangidwa kwa mafoni omwe alimi a ku Malawi amagwiritsa ntchito",
     card2Title: "Data Pang'ono",
@@ -95,12 +96,16 @@ export function FarmersSection({ language }: FarmersSectionProps) {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="hero" className="group">
-                {t.cta}
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <Button variant="hero" className="group" asChild>
+                <Link to="/register">
+                  {t.cta}
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </Button>
-              <Button variant="outline" size="lg">
-                {t.secondary}
+              <Button variant="outline" size="lg" asChild>
+                <Link to="/weather">
+                  {t.secondary}
+                </Link>
               </Button>
             </div>
           </div>

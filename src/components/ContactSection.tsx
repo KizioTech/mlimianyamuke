@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Phone, Mail, MessageCircle, Send, Clock } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { analytics } from "@/utils/analytics";
 
 interface ContactSectionProps {
   language: "en" | "ny";
@@ -80,18 +81,54 @@ export function ContactSection({ language }: ContactSectionProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast.success(t.success);
-    setFormData({ name: "", email: "", phone: "", message: "" });
-    setIsSubmitting(false);
+
+    try {
+      // Use backend API for contact form submission
+      const apiUrl = import.meta.env?.REACT_APP_API_URL || (typeof process !== 'undefined' ? process.env?.REACT_APP_API_URL : null) || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+          language,
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Track contact form submission
+        analytics.track('contact_form_submitted', {
+          language
+        });
+
+        toast.success(t.success);
+        setFormData({ name: "", email: "", phone: "", message: "" });
+      } else {
+        throw new Error(data.message || 'Failed to send message');
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      toast.error(language === "en"
+        ? "Failed to send message. Please try again."
+        : "Kulephera kutumiza uthenga. Yesaninso.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleWhatsAppClick = () => {
-    const message = encodeURIComponent("Hello! I'm interested in Mlimi Anyamuke Initiative services.");
-    window.open(`https://wa.me/265999123456?text=${message}`, "_blank");
+    const message = encodeURIComponent(
+      language === "en"
+        ? "Hello! I'm interested in Mlimi Anyamuke Initiative services."
+        : "Moni! Ndili ndi chidwi ndi ntchito za Mlimi Anyamuke Initiative."
+    );
+  
+    window.open(`https://wa.me/265999978828?text=${message}`, "_blank");
   };
 
   return (
