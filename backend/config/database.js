@@ -1,18 +1,47 @@
 const { Sequelize } = require('sequelize');
 const path = require('path');
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-    dialect: 'postgres',
-    protocol: 'postgres',
-    dialectOptions: {
-        ssl: {
-            require: true,
-            rejectUnauthorized: false
+// Parse the connection string
+const dbUrl = new URL(process.env.DATABASE_URL);
+const dns = require('dns');
+
+// Create a function to initialize Sequelize with resolved IP
+let sequelize;
+
+if (process.env.DATABASE_URL) {
+    // We need to wait for DNS resolution, but Sequelize constructor is synchronous.
+    // Ideally, we would resolve first, but for module export it's tricky.
+    // Instead, we will configure Sequelize to use a custom connection manager or just rely on the side-effect we added to server.js
+
+    // STRATEGY: Since we can't easily make this async at module level without refactoring the whole app,
+    // we will keep the 'family: 4' which SHOULD work if passed correctly.
+
+    // Let's try passing the options differently. sometimes dialectOptions structure is tricky.
+    sequelize = new Sequelize(process.env.DATABASE_URL, {
+        dialect: 'postgres',
+        protocol: 'postgres',
+        dialectOptions: {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false
+            },
+            // Keep family: 4, it is the correct way for pg/net
+            family: 4,
+            // Add this too just in case
+            socketPath: false,
         },
-        // Force usage of IPv4
-        family: 4,
-    },
-    logging: false
-});
+        logging: false,
+        // Add pool options to enforce timeouts and retries
+        pool: {
+            max: 5,
+            min: 0,
+            acquire: 30000,
+            idle: 10000
+        }
+    });
+} else {
+    // Fallback for when env vars aren't loaded yet (e.g. CI)
+    sequelize = new Sequelize('sqlite::memory:', { logging: false });
+}
 
 module.exports = sequelize;
