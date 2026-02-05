@@ -28,7 +28,7 @@ const translations = {
     contact: {
       title: "Get in Touch",
       address: "Dowa, Malawi",
-      phone: "+265 894 199 625",
+      phone: "265996058928",
       email: "mzungap@gmail.com",
       hours: "Mon - Fri: 8:00 AM - 5:00 PM",
     },
@@ -55,7 +55,7 @@ const translations = {
     contact: {
       title: "Tilumikizane",
       address: "Dowa, Malawi",
-      phone: "+265 894 199 625",
+      phone: "+265996058928",
       email: "mzungap@gmail.com",
       hours: "Mon - Fri: 8:00 AM - 5:00 PM",
     },
