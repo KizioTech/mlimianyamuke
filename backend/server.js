@@ -4,6 +4,7 @@ try {
 } catch (error) {
   console.error('Failed to set DNS result order:', error);
 }
+// Force deployment trigger for ipv4 fix
 
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
