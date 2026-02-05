@@ -1,11 +1,6 @@
-const { Sequelize } = require('sequelize');
-const path = require('path');
-
-// Parse the connection string
-const dbUrl = new URL(process.env.DATABASE_URL);
 const dns = require('dns');
 
-// Force IPv4 for all DNS lookups
+// Force IPv4 for all DNS lookups - PATCH MUST BE BEFORE SEQUELIZE/PG LOAD
 const originalLookup = dns.lookup;
 dns.lookup = (hostname, options, callback) => {
     if (typeof options === 'function') {
@@ -14,8 +9,15 @@ dns.lookup = (hostname, options, callback) => {
     }
     options = options || {};
     options.family = 4;
+    console.log(`DNS Lookup for ${hostname} forced to IPv4`);
     return originalLookup(hostname, options, callback);
 };
+
+const { Sequelize } = require('sequelize');
+const path = require('path');
+
+// Parse the connection string
+const dbUrl = new URL(process.env.DATABASE_URL);
 
 // Create a function to initialize Sequelize with resolved IP
 let sequelize;
