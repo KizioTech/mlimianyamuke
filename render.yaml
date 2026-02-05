@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: mlimianyamuke
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_OPTIONS
+        value: --dns-result-order=ipv4first
