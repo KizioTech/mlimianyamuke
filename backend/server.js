@@ -1,3 +1,10 @@
+const dns = require('dns');
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch (error) {
+  console.error('Failed to set DNS result order:', error);
+}
+
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
