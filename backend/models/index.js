@@ -8,6 +8,8 @@ const Resource = require('./Resource');
 const Contact = require('./Contact');
 const Crop = require('./Crop');
 const FarmTask = require('./FarmTask');
+const Testimonial = require('./Testimonial');
+const Analytics = require('./Analytics');
 
 // User <-> Farmer (1:1)
 User.hasOne(Farmer, { foreignKey: 'UserId', onDelete: 'CASCADE' });
@@ -51,5 +53,8 @@ module.exports = {
     Resource,
     Contact,
     Crop,
-    FarmTask
+    Crop,
+    FarmTask,
+    Testimonial,
+    Analytics
 };

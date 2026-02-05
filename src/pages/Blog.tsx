@@ -20,7 +20,7 @@ const Blog: React.FC = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await fetch('/api/posts');
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/posts`);
                 const data = await response.json();
                 setPosts(data);
             } catch (error) {
@@ -54,7 +54,7 @@ const Blog: React.FC = () => {
                             {post.image && (
                                 <div className="w-full h-64 overflow-hidden">
                                     <img
-                                        src={post.image.startsWith('http') ? post.image : `http://localhost:5000${post.image}`}
+                                        src={post.image.startsWith('http') ? post.image : `${import.meta.env.VITE_API_URL}${post.image}`}
                                         alt={post.title}
                                         className="w-full h-full object-cover transition-transform hover:scale-105 duration-500"
                                     />

@@ -27,9 +27,9 @@ const translations = {
     },
     contact: {
       title: "Get in Touch",
-      address: "City Centre, Lilongwe, Malawi",
-      phone: "+265 999 123 456",
-      email: "info@mlimianyamuke.mw",
+      address: "Dowa, Malawi",
+      phone: "+265 894 199 625",
+      email: "mzungap@gmail.com",
       hours: "Mon - Fri: 8:00 AM - 5:00 PM",
     },
     whatsapp: {
@@ -54,10 +54,10 @@ const translations = {
     },
     contact: {
       title: "Tilumikizane",
-      address: "City Centre, Lilongwe, Malawi",
-      phone: "+265 999 123 456",
-      email: "info@mlimianyamuke.mw",
-      hours: "Lolemba - Lachisanu: 8:00 AM - 5:00 PM",
+      address: "Dowa, Malawi",
+      phone: "+265 894 199 625",
+      email: "mzungap@gmail.com",
+      hours: "Mon - Fri: 8:00 AM - 5:00 PM",
     },
     whatsapp: {
       title: "Lankhulani pa WhatsApp",
@@ -84,7 +84,7 @@ export function ContactSection({ language }: ContactSectionProps) {
 
     try {
       // Use backend API for contact form submission
-      const apiUrl = import.meta.env?.REACT_APP_API_URL || (typeof process !== 'undefined' ? process.env?.REACT_APP_API_URL : null) || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const response = await fetch(`${apiUrl}/api/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -127,15 +127,15 @@ export function ContactSection({ language }: ContactSectionProps) {
         ? "Hello! I'm interested in Mlimi Anyamuke Initiative services."
         : "Moni! Ndili ndi chidwi ndi ntchito za Mlimi Anyamuke Initiative."
     );
-  
-    window.open(`https://wa.me/265999978828?text=${message}`, "_blank");
+
+    window.open(`https://wa.me/265996058928?text=${message}`, "_blank");
   };
 
   return (
     <section id="contact" className="section-padding bg-secondary/30 relative overflow-hidden">
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
@@ -178,7 +178,7 @@ export function ContactSection({ language }: ContactSectionProps) {
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="john@example.com"
+                      placeholder="john@gmail.com"
                       required
                       className="h-12"
                     />
@@ -192,7 +192,7 @@ export function ContactSection({ language }: ContactSectionProps) {
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+265 999 123 456"
+                    placeholder="+265 894 199 625"
                     className="h-12"
                   />
                 </div>
@@ -209,10 +209,10 @@ export function ContactSection({ language }: ContactSectionProps) {
                     className="resize-none"
                   />
                 </div>
-                <Button 
-                  type="submit" 
-                  variant="default" 
-                  size="lg" 
+                <Button
+                  type="submit"
+                  variant="default"
+                  size="lg"
                   className="w-full"
                   disabled={isSubmitting}
                 >
@@ -281,8 +281,8 @@ export function ContactSection({ language }: ContactSectionProps) {
                     <p className="text-muted-foreground text-sm">{t.whatsapp.description}</p>
                   </div>
                 </div>
-                <Button 
-                  variant="accent" 
+                <Button
+                  variant="accent"
                   className="w-full"
                   onClick={handleWhatsAppClick}
                 >

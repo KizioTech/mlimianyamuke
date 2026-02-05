@@ -80,7 +80,7 @@ const FarmerDashboard = () => {
                     </TabsList>
 
                     <TabsContent value="reports" className="space-y-4 pt-4">
-                        {reports.length === 0 ? (
+                        {!Array.isArray(reports) || reports.length === 0 ? (
                             <Card>
                                 <CardContent className="p-8 text-center text-muted-foreground">
                                     No farm problems reported yet.
@@ -109,7 +109,7 @@ const FarmerDashboard = () => {
                     </TabsContent>
 
                     <TabsContent value="consultations" className="space-y-4 pt-4">
-                        {consultations.length === 0 ? (
+                        {!Array.isArray(consultations) || consultations.length === 0 ? (
                             <Card>
                                 <CardContent className="p-8 text-center text-muted-foreground">
                                     No consultation requests yet.

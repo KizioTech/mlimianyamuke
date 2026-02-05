@@ -1,3 +1,5 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -11,10 +13,10 @@ const resourceRoutes = require('./routes/resourceRoutes');
 const interactionRoutes = require('./routes/interactionRoutes');
 const { User, Farmer, Contact, Resource } = require('./models');
 const bcrypt = require('bcryptjs');
-const path = require('path');
+
 const upload = require('./middleware/uploadMiddleware');
 
-require('dotenv').config();
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -35,6 +37,7 @@ app.use('/api/farmers', farmerRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/interactions', interactionRoutes);
+app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/farm', require('./routes/cropRoutes'));
 
 // Generic Upload Endpoint (Images)

@@ -57,6 +57,8 @@ const translations = {
 export function Navbar({ language, onLanguageChange }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileFarmersOpen, setIsMobileFarmersOpen] = useState(false);
+  const [isMobileInteractiveOpen, setIsMobileInteractiveOpen] = useState(false);
   const location = useLocation();
   const { user, logout, isAuthenticated, isAdmin } = useAuth();
   const t = translations[language];
@@ -277,31 +279,51 @@ export function Navbar({ language, onLanguageChange }: NavbarProps) {
               </Link>
             ))}
 
-            <div className="pt-2 pb-1 px-4 text-xs font-bold text-muted-foreground uppercase">{t.farmers}</div>
-            {farmerLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium hover:bg-muted"
-              >
-                <link.icon className="w-4 h-4 text-primary" />
-                {link.label}
-              </Link>
-            ))}
+            {/* Mobile Farmers Dropdown */}
+            <div
+              className="flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-muted rounded-xl"
+              onClick={() => setIsMobileFarmersOpen(!isMobileFarmersOpen)}
+            >
+              <div className="text-xs font-bold text-muted-foreground uppercase">{t.farmers}</div>
+              <ChevronDown className={cn("w-4 h-4 transition-transform", isMobileFarmersOpen && "rotate-180")} />
+            </div>
 
-            <div className="pt-2 pb-1 px-4 text-xs font-bold text-muted-foreground uppercase">Interactive</div>
-            {interactiveLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium hover:bg-muted text-orange-600"
-              >
-                <link.icon className="w-4 h-4" />
-                {link.label}
-              </Link>
-            ))}
+            <div className={cn("space-y-1 overflow-hidden transition-all duration-300", isMobileFarmersOpen ? "max-h-64" : "max-h-0")}>
+              {farmerLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-8 py-3 rounded-xl font-medium hover:bg-muted text-sm"
+                >
+                  <link.icon className="w-4 h-4 text-primary" />
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            {/* Mobile Interactive Dropdown */}
+            <div
+              className="flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-muted rounded-xl"
+              onClick={() => setIsMobileInteractiveOpen(!isMobileInteractiveOpen)}
+            >
+              <div className="text-xs font-bold text-muted-foreground uppercase">Interactive</div>
+              <ChevronDown className={cn("w-4 h-4 transition-transform", isMobileInteractiveOpen && "rotate-180")} />
+            </div>
+
+            <div className={cn("space-y-1 overflow-hidden transition-all duration-300", isMobileInteractiveOpen ? "max-h-64" : "max-h-0")}>
+              {interactiveLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-8 py-3 rounded-xl font-medium hover:bg-muted text-orange-600 text-sm"
+                >
+                  <link.icon className="w-4 h-4" />
+                  {link.label}
+                </Link>
+              ))}
+            </div>
 
             {!isAuthenticated && (
               <Button variant="default" className="w-full mt-4" asChild>

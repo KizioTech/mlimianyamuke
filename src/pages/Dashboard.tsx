@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from 'sonner';
-import { Plus, Trash2, Edit, Users, MessageSquare, LayoutDashboard, LogOut, Package, FileText, Upload, Image as ImageIcon, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, Edit, Users, MessageSquare, LayoutDashboard, LogOut, Package, FileText, Upload, Image as ImageIcon, AlertTriangle, TrendingUp, UserPlus, Leaf as LeafIcon } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 interface Post {
     id: number;
@@ -71,6 +72,23 @@ interface FarmReport {
     linkedPostIds?: number[];
 }
 
+
+interface Testimonial {
+    id: number;
+    name: string;
+    role: string;
+    content: string;
+    image?: string;
+    featured: boolean;
+    createdAt: string;
+}
+
+interface AnalyticsData {
+    farmers: { total: number; new: number };
+    traffic: { path: string; visits: number; day: string }[];
+    topPosts: Post[];
+}
+
 const Dashboard: React.FC = () => {
     const { token, logout } = useAuth();
     const [posts, setPosts] = useState<Post[]>([]);
@@ -79,6 +97,8 @@ const Dashboard: React.FC = () => {
     const [resources, setResources] = useState<Resource[]>([]);
     const [consultations, setConsultations] = useState<Consultation[]>([]);
     const [reports, setReports] = useState<FarmReport[]>([]);
+    const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+    const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
 
     // Response Dialog State
     const [selectedItem, setSelectedItem] = useState<Consultation | FarmReport | null>(null);
@@ -153,50 +173,49 @@ const Dashboard: React.FC = () => {
         try {
             const headers = { Authorization: `Bearer ${token}` };
 
-            const [postsRes, farmersRes, contactsRes, resourcesRes, consultsRes, reportsRes] = await Promise.all([
+            const [postsRes, farmersRes, contactsRes, resourcesRes, consultsRes, reportsRes, testimonialsRes, analyticsRes] = await Promise.all([
                 fetch('/api/posts', { headers }),
                 fetch('/api/farmers', { headers }),
                 fetch('/api/contacts', { headers }),
                 fetch('/api/resources', { headers }),
                 fetch('/api/interactions/consultations/all', { headers }),
-                fetch('/api/interactions/reports/all', { headers })
+                fetch('/api/interactions/reports/all', { headers }),
+                fetch('/api/admin/testimonials', { headers }),
+                fetch('/api/admin/analytics/dashboard', { headers })
             ]);
 
-            const [postsData, farmersData, contactsData, resourcesData, consultsData, reportsData] = await Promise.all([
+            const [postsData, farmersData, contactsData, resourcesData, consultsData, reportsData, testimonialsData, analyticsStats] = await Promise.all([
                 postsRes.json(),
                 farmersRes.json(),
                 contactsRes.json(),
                 resourcesRes.json(),
                 consultsRes.json(),
-                reportsRes.json()
+                reportsRes.json(),
+                testimonialsRes.json(),
+                analyticsRes.json()
             ]);
 
-            console.log('Fetched data:', {
-                posts: postsData,
-                farmers: farmersData,
-                contacts: contactsData,
-                resources: resourcesData,
-                consultations: consultsData,
-                reports: reportsData
-            });
-
-            // Set data with fallbacks to empty arrays if data is invalid
+            // Set data with fallbacks
             setPosts(Array.isArray(postsData) ? postsData : []);
             setFarmers(Array.isArray(farmersData) ? farmersData : []);
             setContacts(Array.isArray(contactsData) ? contactsData : []);
             setResources(Array.isArray(resourcesData) ? resourcesData : []);
             setConsultations(Array.isArray(consultsData) ? consultsData : []);
             setReports(Array.isArray(reportsData) ? reportsData : []);
+            setTestimonials(Array.isArray(testimonialsData) ? testimonialsData : []);
+            setAnalyticsData(analyticsStats || null);
+
         } catch (error) {
             console.error('Error fetching data:', error);
             toast.error('Failed to fetch data');
-            // Set empty arrays on error to prevent map() errors
             setPosts([]);
             setFarmers([]);
             setContacts([]);
             setResources([]);
             setConsultations([]);
             setReports([]);
+            setTestimonials([]);
+            setAnalyticsData(null);
         }
     };
 
@@ -365,6 +384,128 @@ const Dashboard: React.FC = () => {
         }
     };
 
+    // Handlers for Testimonials
+    const [isNewTestimonialOpen, setIsNewTestimonialOpen] = useState(false);
+    const [newTestimonial, setNewTestimonial] = useState({
+        name: '',
+        role: '',
+        content: '',
+        image: '',
+        featured: false
+    });
+    const [uploadingTestimonialImage, setUploadingTestimonialImage] = useState(false);
+
+    const handleTestimonialImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingTestimonialImage(true);
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setNewTestimonial({ ...newTestimonial, image: data.url });
+                toast.success('Image uploaded');
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            toast.error('Image upload failed');
+        } finally {
+            setUploadingTestimonialImage(false);
+        }
+    };
+
+    const handleCreateTestimonial = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const response = await fetch('/api/admin/testimonials', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(newTestimonial)
+            });
+
+            if (!response.ok) throw new Error('Failed to create testimonial');
+
+            toast.success('Testimonial created');
+            setNewTestimonial({ name: '', role: '', content: '', image: '', featured: false });
+            setIsNewTestimonialOpen(false);
+            fetchData();
+        } catch (error) {
+            toast.error('Failed to create testimonial');
+        }
+    };
+
+    const handleDeleteTestimonial = async (id: number) => {
+        if (!confirm('Delete this testimonial?')) return;
+        try {
+            const response = await fetch(`/api/admin/testimonials/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.ok) {
+                toast.success('Testimonial deleted');
+                fetchData();
+            }
+        } catch (error) {
+            toast.error('Delete failed');
+        }
+    };
+
+    // Handlers for Farmer Details
+    const [selectedFarmer, setSelectedFarmer] = useState<any>(null);
+    const [isFarmerDetailsOpen, setIsFarmerDetailsOpen] = useState(false);
+    const [messageText, setMessageText] = useState('');
+
+    const handleViewFarmer = async (farmerId: number) => {
+        try {
+            const res = await fetch(`/api/admin/farmers/${farmerId}/details`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setSelectedFarmer(data);
+                setIsFarmerDetailsOpen(true);
+            } else {
+                toast.error('Failed to load farmer details');
+            }
+        } catch (error) {
+            toast.error('Error loading details');
+        }
+    };
+
+    const handleSendMessage = async () => {
+        if (!selectedFarmer || !messageText) return;
+        try {
+            const res = await fetch(`/api/admin/farmers/${selectedFarmer.profile.id}/message`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ message: messageText, type: 'sms' })
+            });
+
+            if (res.ok) {
+                toast.success('Message sent successfully (Simulation)');
+                setMessageText('');
+                setIsFarmerDetailsOpen(false);
+            }
+        } catch (error) {
+            toast.error('Failed to send message');
+        }
+    };
+
     return (
         <div className="container mx-auto py-10 px-4 min-h-screen bg-gray-50/50">
             <div className="flex justify-between items-center mb-10">
@@ -382,15 +523,111 @@ const Dashboard: React.FC = () => {
                 </Button>
             </div>
 
-            <Tabs defaultValue="posts" className="space-y-6">
+            <Tabs defaultValue="analytics" className="space-y-6">
                 <TabsList className="grid w-full grid-cols-6 max-w-full">
+                    <TabsTrigger value="analytics" className="gap-2"><LayoutDashboard className="h-4 w-4" /> Analytics</TabsTrigger>
                     <TabsTrigger value="posts" className="gap-2"><FileText className="h-4 w-4" /> Posts</TabsTrigger>
                     <TabsTrigger value="resources" className="gap-2"><Package className="h-4 w-4" /> Resources</TabsTrigger>
                     <TabsTrigger value="farmers" className="gap-2"><Users className="h-4 w-4" /> Farmers</TabsTrigger>
+                    <TabsTrigger value="testimonials" className="gap-2"><MessageSquare className="h-4 w-4" /> Testimonials</TabsTrigger>
                     <TabsTrigger value="consultations" className="gap-2"><MessageSquare className="h-4 w-4" /> Consultations</TabsTrigger>
                     <TabsTrigger value="reports" className="gap-2"><AlertTriangle className="h-4 w-4" /> Reports</TabsTrigger>
                     <TabsTrigger value="contacts" className="gap-2"><MessageSquare className="h-4 w-4" /> Inquiries</TabsTrigger>
                 </TabsList>
+
+                {/* ANALYTICS TAB */}
+                <TabsContent value="analytics" className="space-y-6">
+                    <h2 className="text-2xl font-semibold">Platform Overview</h2>
+
+                    {/* Stats Cards */}
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Total Farmers</CardTitle>
+                                <Users className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{analyticsData?.farmers?.total || 0}</div>
+                                <p className="text-xs text-muted-foreground">
+                                    +{analyticsData?.farmers?.new || 0} this month
+                                </p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Active Posts</CardTitle>
+                                <FileText className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{posts.filter(p => !p.title.includes('Draft')).length}</div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Consultations</CardTitle>
+                                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{consultations.length}</div>
+                                <p className="text-xs text-muted-foreground">
+                                    {consultations.filter(c => c.status === 'pending').length} pending
+                                </p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Farm Reports</CardTitle>
+                                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{reports.length}</div>
+                                <p className="text-xs text-muted-foreground">
+                                    {reports.filter(r => r.status === 'pending').length} pending
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Chart */}
+                    <Card className="col-span-4">
+                        <CardHeader>
+                            <CardTitle>Web Traffic</CardTitle>
+                            <CardDescription>
+                                Page views over the last 30 days.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pl-2">
+                            <div className="h-[300px] w-full">
+                                {analyticsData?.traffic?.length ? (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <LineChart data={analyticsData.traffic}>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                            <XAxis
+                                                dataKey="day"
+                                                tickFormatter={(value) => new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            />
+                                            <YAxis allowDecimals={false} />
+                                            <Tooltip
+                                                labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                                            />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="visits"
+                                                stroke="hsl(var(--primary))"
+                                                strokeWidth={2}
+                                                dot={false}
+                                            />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                                        No traffic data available yet.
+                                    </div>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
 
                 {/* POSTS TAB */}
                 <TabsContent value="posts" className="space-y-6">
@@ -579,16 +816,14 @@ const Dashboard: React.FC = () => {
 
                 {/* FARMERS TAB */}
                 <TabsContent value="farmers" className="space-y-6">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-2xl font-semibold">Registered Farmers</h2>
-                    </div>
+                    <h2 className="text-2xl font-semibold">Registered Farmers</h2>
                     <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
                         <table className="w-full text-left">
                             <thead className="bg-gray-50 border-b">
                                 <tr>
-                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
-                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
+                                    <th className="px-6 py-3 text-sm font-semibold">Name</th>
+                                    <th className="px-6 py-3 text-sm font-semibold">Phone / Location</th>
+                                    <th className="px-6 py-3 text-sm font-semibold">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
@@ -596,11 +831,182 @@ const Dashboard: React.FC = () => {
                                     <tr key={farmer.id}>
                                         <td className="px-6 py-4 font-medium">{farmer.name}</td>
                                         <td className="px-6 py-4">{farmer.phone} ({farmer.district})</td>
-                                        <td className="px-6 py-4 text-red-500 cursor-pointer" onClick={() => handleDeleteFarmer(farmer.id)}>Delete</td>
+                                        <td className="px-6 py-4 flex gap-3">
+                                            <Button variant="outline" size="sm" onClick={() => handleViewFarmer(farmer.id)}>
+                                                View Details
+                                            </Button>
+                                            <Button variant="ghost" size="sm" onClick={() => handleDeleteFarmer(farmer.id)} className="text-red-500">
+                                                Delete
+                                            </Button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+
+                    <Dialog open={isFarmerDetailsOpen} onOpenChange={setIsFarmerDetailsOpen}>
+                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Farmer Profile</DialogTitle>
+                            </DialogHeader>
+                            {selectedFarmer && (
+                                <div className="space-y-6">
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                        <Card>
+                                            <CardHeader className="pb-2"><CardTitle className="text-sm">Personal Info</CardTitle></CardHeader>
+                                            <CardContent>
+                                                <div className="space-y-1 text-sm">
+                                                    <p><strong>Name:</strong> {selectedFarmer.profile.name}</p>
+                                                    <p><strong>Phone:</strong> {selectedFarmer.profile.phone}</p>
+                                                    <p><strong>Location:</strong> {selectedFarmer.profile.district}</p>
+                                                    <p><strong>Language:</strong> {selectedFarmer.profile.language}</p>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                        <Card>
+                                            <CardHeader className="pb-2"><CardTitle className="text-sm">Quick Actions</CardTitle></CardHeader>
+                                            <CardContent>
+                                                <p className="text-xs text-muted-foreground mb-2">Send SMS/Notification</p>
+                                                <div className="flex gap-2">
+                                                    <Input
+                                                        placeholder="Message..."
+                                                        value={messageText}
+                                                        onChange={(e) => setMessageText(e.target.value)}
+                                                    />
+                                                    <Button size="sm" onClick={handleSendMessage}><MessageSquare className="w-4 h-4" /></Button>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="font-semibold mb-2 flex items-center gap-2"><LeafIcon className="w-4 h-4" /> Crops & Land</h3>
+                                        <div className="grid gap-2">
+                                            {selectedFarmer.crops?.length ? selectedFarmer.crops.map((c: any) => (
+                                                <div key={c.id} className="p-3 border rounded-lg text-sm bg-gray-50 flex justify-between">
+                                                    <span><strong>{c.cropName}</strong> ({c.variety})</span>
+                                                    <span>{c.landSize} acres • {c.status}</span>
+                                                </div>
+                                            )) : <p className="text-muted-foreground text-sm">No crops registered yet.</p>}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="font-semibold mb-2 flex items-center gap-2"><AlertTriangle className="w-4 h-4" /> Recent Reports</h3>
+                                        <div className="grid gap-2">
+                                            {selectedFarmer.reports?.length ? selectedFarmer.reports.map((r: any) => (
+                                                <div key={r.id} className="p-3 border rounded-lg text-sm bg-gray-50">
+                                                    <div className="flex justify-between font-medium mb-1">
+                                                        <span>{r.problemType}</span>
+                                                        <Badge variant={r.status === 'resolved' ? 'default' : 'outline'}>{r.status}</Badge>
+                                                    </div>
+                                                    <p className="text-gray-600 line-clamp-1">{r.description}</p>
+                                                </div>
+                                            )) : <p className="text-muted-foreground text-sm">No reports submitted.</p>}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </DialogContent>
+                    </Dialog>
+                </TabsContent>
+                {/* TESTIMONIALS TAB */}
+                <TabsContent value="testimonials" className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-2xl font-semibold">Testimonials</h2>
+                        <Dialog open={isNewTestimonialOpen} onOpenChange={setIsNewTestimonialOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="gap-2"><Plus className="h-4 w-4" /> New Testimonial</Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[500px]">
+                                <DialogHeader>
+                                    <DialogTitle>Add Testimonial</DialogTitle>
+                                    <DialogDescription>Share a success story from a farmer.</DialogDescription>
+                                </DialogHeader>
+                                <form onSubmit={handleCreateTestimonial} className="space-y-4 pt-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Farmer Name</label>
+                                        <Input
+                                            value={newTestimonial.name}
+                                            onChange={(e) => setNewTestimonial({ ...newTestimonial, name: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Role / Location</label>
+                                        <Input
+                                            placeholder="e.g. Maize Farmer, Kasungu"
+                                            value={newTestimonial.role}
+                                            onChange={(e) => setNewTestimonial({ ...newTestimonial, role: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Photo</label>
+                                        <div className="flex gap-4 items-center">
+                                            {newTestimonial.image && (
+                                                <div className="w-16 h-16 rounded-full overflow-hidden shrink-0">
+                                                    <img src={newTestimonial.image} className="w-full h-full object-cover" />
+                                                </div>
+                                            )}
+                                            <div className="flex-1">
+                                                <Input type="file" accept="image/*" onChange={handleTestimonialImageUpload} disabled={uploadingTestimonialImage} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Quote</label>
+                                        <Textarea
+                                            value={newTestimonial.content}
+                                            onChange={(e) => setNewTestimonial({ ...newTestimonial, content: e.target.value })}
+                                            required
+                                            rows={4}
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id="featured_testimonial"
+                                            checked={newTestimonial.featured}
+                                            onChange={(e) => setNewTestimonial({ ...newTestimonial, featured: e.target.checked })}
+                                            className="w-4 h-4"
+                                        />
+                                        <label htmlFor="featured_testimonial" className="text-sm font-medium">Featured on Home Page</label>
+                                    </div>
+                                    <Button type="submit" className="w-full" disabled={uploadingTestimonialImage}>
+                                        {uploadingTestimonialImage ? 'Uploading...' : 'Save Testimonial'}
+                                    </Button>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {testimonials.map((t) => (
+                            <Card key={t.id} className="relative">
+                                <CardHeader className="flex flex-row items-center gap-4 py-4">
+                                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                                        {t.image ? (
+                                            <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <span className="text-primary font-bold text-lg">{t.name.charAt(0)}</span>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-base">{t.name}</CardTitle>
+                                        <CardDescription>{t.role}</CardDescription>
+                                    </div>
+                                    <Button variant="ghost" size="icon" onClick={() => handleDeleteTestimonial(t.id)} className="ml-auto text-red-500">
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-sm italic text-muted-foreground">"{t.content}"</p>
+                                    {t.featured && <Badge variant="secondary" className="mt-2">Featured</Badge>}
+                                </CardContent>
+                            </Card>
+                        ))}
                     </div>
                 </TabsContent>
 

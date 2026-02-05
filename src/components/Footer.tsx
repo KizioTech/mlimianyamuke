@@ -137,7 +137,7 @@ export function Footer({ language }: FooterProps) {
                 <MessageCircle className="w-5 h-5 text-accent flex-shrink-0" />
                 <a href="https://wa.me/265996058928" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/70 hover:text-white transition-colors">+265 996 058 928</a>
               </li>
-              <li className="flex items-center gap-3">
+              <li className="flex items-c1.enter gap-3">
                 <Facebook className="w-5 h-5 text-accent flex-shrink-0" />
                 <a href="https://web.facebook.com/profile.php?id=100095065316526" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/70 hover:text-white transition-colors">Mlimi Anyamuke Initiative</a>
               </li>
