@@ -9,6 +9,8 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
             require: true,
             rejectUnauthorized: false
         },
+        // Force usage of IPv4
+        family: 4,
     },
     logging: false
 });
